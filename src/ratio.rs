@@ -5,13 +5,22 @@ use crate::{
     interval::ApproximateEqualTemperedInterval,
     math::{greatest_prime_factor, reduce},
 };
-use std::ops::{Div, Mul, Neg};
+use std::{
+    fmt::Display,
+    ops::{Div, Mul, Neg},
+};
 
 /// Models a ratio of two integers, defining an interval in just intonation.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ratio {
     pub numer: i32,
     pub denom: i32,
+}
+
+impl Display for Ratio {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.numer, self.denom)
+    }
 }
 
 impl From<(i32, i32)> for Ratio {
