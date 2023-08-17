@@ -1,7 +1,10 @@
 //! Provides structs and operators to work with [Ratios][Ratio].
 //!
 
-use crate::math::reduce;
+use crate::{
+    interval::ApproximateEqualTemperedInterval,
+    math::{greatest_prime_factor, reduce},
+};
 use std::ops::{Div, Mul, Neg};
 
 /// Models a ratio of two integers, defining an interval in just intonation.
@@ -9,6 +12,13 @@ use std::ops::{Div, Mul, Neg};
 pub struct Ratio {
     pub numer: i32,
     pub denom: i32,
+}
+
+impl From<(i32, i32)> for Ratio {
+    fn from(value: (i32, i32)) -> Self {
+        let (n, d) = value;
+        Self::new(n, d)
+    }
 }
 
 impl Neg for Ratio {
@@ -120,11 +130,50 @@ impl Ratio {
             _ => Self::new(self.numer.pow(exp as u32), self.denom.pow(exp as u32)).normalize(),
         }
     }
+
+    /// Converts the ratio into a tuple pair of an equal tempered interval and
+    /// the number of cents difference between the ET interval and the JI ratio
+    ///
+    /// ## Example
+    ///
+    /// ```rust
+    /// # use rust_intonation::ratio::Ratio;
+    /// # use rust_intonation::interval::EqualTemperedInterval;
+    /// let r = Ratio::new(3, 2);
+    /// assert_eq!(
+    ///   r.to_approximate_equal_tempered_interval(),
+    ///   (EqualTemperedInterval::PerfectFifth, 1.954956)
+    /// );
+    /// ```
+    /// This shows that a JI ratio of 3/2 is approximately 2 cents wider than an ET perfect 5th.
+    pub fn to_approximate_equal_tempered_interval(&self) -> ApproximateEqualTemperedInterval {
+        (*self).into()
+    }
+
+    /// Finds the prime limit of the ratio
+    ///
+    /// ## Examples
+    ///
+    /// ```rust
+    /// # use rust_intonation::ratio::Ratio;
+    /// let r = Ratio::new(3, 2);
+    /// assert_eq!(r.limit(), 3);
+    /// ```
+    ///
+    /// ```rust
+    /// # use rust_intonation::ratio::Ratio;
+    /// let r = Ratio::new(81, 80);
+    /// assert_eq!(r.limit(), 5);
+    /// ```
+    pub fn limit(&self) -> i32 {
+        greatest_prime_factor(self.numer).max(greatest_prime_factor(self.denom))
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::interval::EqualTemperedInterval;
 
     #[test]
     fn new_simple_ratio() {
@@ -195,5 +244,26 @@ mod tests {
         assert_eq!(r1.pow(1), Ratio::new(3, 2));
         assert_eq!(r1.pow(2), Ratio::new(9, 8));
         assert_eq!(r1.pow(-2), Ratio::new(16, 9));
+    }
+
+    #[test]
+    fn to_modified_et_interval() {
+        let r = Ratio::new(3, 2);
+        let i = r.to_approximate_equal_tempered_interval();
+        assert_eq!(i.0, EqualTemperedInterval::PerfectFifth);
+        assert!((i.1 - 1.955).abs() < 0.001);
+    }
+
+    #[test]
+    fn from_tuple() {
+        let t = (3, 2);
+        assert_eq!(Ratio::from(t), Ratio::new(3, 2));
+    }
+
+    #[test]
+    fn limit() {
+        assert_eq!(Ratio::new(3, 2).limit(), 3);
+        assert_eq!(Ratio::new(5, 4).limit(), 5);
+        assert_eq!(Ratio::new(8, 5).limit(), 5);
     }
 }

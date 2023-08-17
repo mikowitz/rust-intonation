@@ -4,7 +4,8 @@ pub mod dimension;
 pub mod dimension_bounds;
 
 use crate::ratio::Ratio;
-use dimension::LatticeDimension;
+pub use dimension::LatticeDimension;
+pub use dimension_bounds::LatticeDimensionBounds;
 
 /// Models an n-dimensional just intonation ratio lattice, constructed from a vector
 /// of [LatticeDimensions][LatticeDimension].
