@@ -17,3 +17,27 @@ fn gcd(a: i32, b: i32) -> i32 {
     }
     b
 }
+
+pub(crate) fn greatest_prime_factor(a: i32) -> i32 {
+    let mut a = a;
+    let mut p = 2;
+
+    while a > 1 {
+        if a % p == 0 {
+            a /= p;
+        } else {
+            p += 1;
+        }
+    }
+    p
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn gpf() {
+        assert_eq!(greatest_prime_factor(5), 5);
+    }
+}
