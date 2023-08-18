@@ -45,16 +45,11 @@ impl Diamond {
 fn index_coordinates(max: usize) -> Vec<Vec<(usize, usize)>> {
     let mut coordinate_rows = vec![];
     for i in (0..=max).rev() {
-        let row = (i..=max)
-            .into_iter()
-            .enumerate()
-            .map(|(a, b)| (a, b))
-            .collect::<Vec<(usize, usize)>>();
+        let row = (i..=max).enumerate().collect::<Vec<(usize, usize)>>();
         coordinate_rows.push(row);
     }
     for i in 1..=max {
         let row = (i..=max)
-            .into_iter()
             .enumerate()
             .map(|(a, b)| (b, a))
             .collect::<Vec<(usize, usize)>>();
