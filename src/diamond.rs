@@ -12,10 +12,10 @@ impl Diamond {
     pub fn generate(&self) -> Vec<Vec<Ratio>> {
         self.identities
             .iter()
-            .map(|x| {
+            .map(|d| {
                 self.identities
                     .iter()
-                    .map(|y| Ratio::new(*y as i32, *x as i32).normalize())
+                    .map(|n| Ratio::new(*n as i32, *d as i32).normalize())
                     .collect::<Vec<Ratio>>()
             })
             .collect::<Vec<Vec<Ratio>>>()
@@ -23,40 +23,43 @@ impl Diamond {
 
     pub fn display(&self) -> String {
         let ratios = self.generate();
-        index_coordinates(self.identities.len() - 1)
+        self.index_coordinates()
             .iter()
-            .map(|row| {
-                let prefix_len = self.identities.len() - row.len();
-                let prefix = "\t".repeat(prefix_len);
-                format!(
-                    "{}{}",
-                    prefix,
-                    row.iter()
-                        .map(|(a, b)| format!("{}", &ratios[*a][*b]))
-                        .collect::<Vec<String>>()
-                        .join("\t\t")
-                )
-            })
+            .map(|row| self.construct_lattice_row(row, &ratios))
             .collect::<Vec<String>>()
             .join("\n\n")
     }
-}
 
-fn index_coordinates(max: usize) -> Vec<Vec<(usize, usize)>> {
-    let mut coordinate_rows = vec![];
-    for i in (0..=max).rev() {
-        let row = (i..=max).enumerate().collect::<Vec<(usize, usize)>>();
-        coordinate_rows.push(row);
-    }
-    for i in 1..=max {
-        let row = (i..=max)
-            .enumerate()
-            .map(|(a, b)| (b, a))
-            .collect::<Vec<(usize, usize)>>();
-        coordinate_rows.push(row);
+    fn construct_lattice_row(&self, row: &[(usize, usize)], ratios: &[Vec<Ratio>]) -> String {
+        let prefix_len = self.identities.len() - row.len();
+        let prefix = "\t".repeat(prefix_len);
+        format!(
+            "{}{}",
+            prefix,
+            row.iter()
+                .map(|(a, b)| format!("{}", &ratios[*a][*b]))
+                .collect::<Vec<String>>()
+                .join("\t\t")
+        )
     }
 
-    coordinate_rows
+    fn index_coordinates(&self) -> Vec<Vec<(usize, usize)>> {
+        let max = self.identities.len() - 1;
+        let mut coordinate_rows = vec![];
+        for i in (0..=max).rev() {
+            let row = (i..=max).enumerate().collect::<Vec<(usize, usize)>>();
+            coordinate_rows.push(row);
+        }
+        for i in 1..=max {
+            let row = (i..=max)
+                .enumerate()
+                .map(|(a, b)| (b, a))
+                .collect::<Vec<(usize, usize)>>();
+            coordinate_rows.push(row);
+        }
+
+        coordinate_rows
+    }
 }
 
 #[cfg(test)]

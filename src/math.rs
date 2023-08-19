@@ -1,9 +1,9 @@
-pub fn reduce(a: i32, b: i32) -> (i32, i32) {
+pub(crate) fn reduce(a: i32, b: i32) -> (i32, i32) {
     let g = gcd(a, b);
     (a / g, b / g)
 }
 
-pub fn sign_preserving_mod(a: i32, b: i32) -> i32 {
+pub(crate) fn sign_preserving_mod(a: i32, b: i32) -> i32 {
     (a % b + b) % b
 }
 
@@ -37,7 +37,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn gpf() {
+    fn test_greatest_prime_factor() {
         assert_eq!(greatest_prime_factor(5), 5);
+        assert_eq!(greatest_prime_factor(15), 5);
+        assert_eq!(greatest_prime_factor(14), 7);
     }
 }
