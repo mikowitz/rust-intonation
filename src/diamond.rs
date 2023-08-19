@@ -1,36 +1,52 @@
-use crate::ratio::Ratio;
+use num::PrimInt;
 
-pub struct Diamond {
+use crate::ratio::Ratio;
+use std::{fmt::Display, marker::PhantomData};
+
+pub struct Diamond<T: PrimInt = i32> {
     pub identities: Vec<u32>,
+    phantom: PhantomData<T>,
 }
 
-impl Diamond {
+impl<T: PrimInt> Display for Diamond<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let ratios = self.generate();
+        let output = self
+            .index_coordinates()
+            .iter()
+            .map(|row| self.construct_diamond_row(row, &ratios))
+            .collect::<Vec<String>>()
+            .join("\n\n");
+        write!(f, "{}", output)
+    }
+}
+
+type Coordinate = (usize, usize);
+type Coordinates = Vec<Coordinate>;
+
+impl<T: PrimInt> Diamond<T> {
     pub fn new(identities: Vec<u32>) -> Self {
-        Self { identities }
+        Self {
+            identities,
+            phantom: PhantomData::<T>,
+        }
     }
 
-    pub fn generate(&self) -> Vec<Vec<Ratio>> {
+    pub fn generate(&self) -> Vec<Vec<Ratio<i32>>> {
         self.identities
             .iter()
-            .map(|d| {
-                self.identities
-                    .iter()
-                    .map(|n| Ratio::new(*n as i32, *d as i32).normalize())
-                    .collect::<Vec<Ratio>>()
-            })
-            .collect::<Vec<Vec<Ratio>>>()
+            .map(|d| self.construct_ratios_with_denominator(*d as i32))
+            .collect()
     }
 
-    pub fn display(&self) -> String {
-        let ratios = self.generate();
-        self.index_coordinates()
+    fn construct_ratios_with_denominator(&self, denominator: i32) -> Vec<Ratio<i32>> {
+        self.identities
             .iter()
-            .map(|row| self.construct_lattice_row(row, &ratios))
-            .collect::<Vec<String>>()
-            .join("\n\n")
+            .map(|n| Ratio::new(*n as i32, denominator).normalize())
+            .collect()
     }
 
-    fn construct_lattice_row(&self, row: &[(usize, usize)], ratios: &[Vec<Ratio>]) -> String {
+    fn construct_diamond_row(&self, row: &[Coordinate], ratios: &[Vec<Ratio<i32>>]) -> String {
         let prefix_len = self.identities.len() - row.len();
         let prefix = "\t".repeat(prefix_len);
         format!(
@@ -43,18 +59,15 @@ impl Diamond {
         )
     }
 
-    fn index_coordinates(&self) -> Vec<Vec<(usize, usize)>> {
+    fn index_coordinates(&self) -> Vec<Coordinates> {
         let max = self.identities.len() - 1;
         let mut coordinate_rows = vec![];
         for i in (0..=max).rev() {
-            let row = (i..=max).enumerate().collect::<Vec<(usize, usize)>>();
+            let row: Coordinates = (i..=max).enumerate().collect();
             coordinate_rows.push(row);
         }
         for i in 1..=max {
-            let row = (i..=max)
-                .enumerate()
-                .map(|(a, b)| (b, a))
-                .collect::<Vec<(usize, usize)>>();
+            let row: Coordinates = (i..=max).enumerate().map(|(a, b)| (b, a)).collect();
             coordinate_rows.push(row);
         }
 
@@ -68,7 +81,7 @@ mod tests {
 
     #[test]
     fn five_limit() {
-        let d = Diamond::new(vec![1, 3, 5]);
+        let d: Diamond = Diamond::new(vec![1, 3, 5]);
         let g = d.generate();
 
         assert_eq!(g[0][0], Ratio::new(1, 1));

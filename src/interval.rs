@@ -1,6 +1,7 @@
 //! Operations for converting between JI ratios and approximations of ET (cent-based) intervals
 
 use crate::ratio::Ratio;
+use num::traits::PrimInt;
 
 macro_rules! ji_interval {
     ($name:ident $n:tt/$d:tt) => {
@@ -35,8 +36,8 @@ pub enum EqualTemperedInterval {
     MajorSeventh,
 }
 
-impl From<f32> for EqualTemperedInterval {
-    fn from(value: f32) -> Self {
+impl From<f64> for EqualTemperedInterval {
+    fn from(value: f64) -> Self {
         match (value / 100.) % 12. {
             n if n == 0. => Self::PerfectUnison,
             n if n == 1. => Self::MinorSecond,
@@ -57,12 +58,12 @@ impl From<f32> for EqualTemperedInterval {
 
 /// Describes the approximation of an equal tempered interval as a tuple
 /// pair of the named ET interval and a difference from ET, given in cents.
-pub type ApproximateEqualTemperedInterval = (EqualTemperedInterval, f32);
+pub type ApproximateEqualTemperedInterval = (EqualTemperedInterval, f64);
 
-impl From<Ratio> for ApproximateEqualTemperedInterval {
-    fn from(value: Ratio) -> Self {
-        let f: f32 = (&value.normalize()).into();
-        let ji_cents: f32 = 1200. * f.log2();
+impl<T: PrimInt> From<Ratio<T>> for ApproximateEqualTemperedInterval {
+    fn from(value: Ratio<T>) -> Self {
+        let f: f64 = (&value.normalize()).into();
+        let ji_cents: f64 = 1200. * f.log2();
 
         let et_cents = (ji_cents / 100.).round() * 100.;
 
@@ -73,6 +74,7 @@ impl From<Ratio> for ApproximateEqualTemperedInterval {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ratio::Ratio;
     use EqualTemperedInterval::*;
 
     #[test]
