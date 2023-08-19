@@ -1,21 +1,23 @@
 use super::dimension_bounds::LatticeDimensionBounds;
 use crate::ratio::Ratio;
 
+use num::traits::PrimInt;
+
 /// Models one dimension of a lattice, defining the [Ratio] by which to extend the dimension,
 /// as well as the rules for [bounding][LatticeDimensionBounds] the dimension.
-pub struct LatticeDimension {
-    pub ratio: Ratio,
+pub struct LatticeDimension<T: PrimInt> {
+    pub ratio: Ratio<T>,
     pub bounds: LatticeDimensionBounds,
 }
 
-impl LatticeDimension {
-    pub fn new(ratio: Ratio, bounds: LatticeDimensionBounds) -> Self {
+impl<T: PrimInt> LatticeDimension<T> {
+    pub fn new(ratio: Ratio<T>, bounds: LatticeDimensionBounds) -> Self {
         Self { ratio, bounds }
     }
 
     /// Indexes into the dimension, based on the [bounding rules][LatticeDimensionBounds] defined
     /// for the dimension.
-    pub fn at(&self, index: i32) -> Ratio {
+    pub fn at(&self, index: i32) -> Ratio<T> {
         let index = self.bounds.resolve_index(index);
         self.ratio.pow(index)
     }
@@ -25,6 +27,7 @@ impl LatticeDimension {
 mod tests {
     use super::LatticeDimensionBounds::*;
     use super::*;
+    use crate::ratio::Ratio;
 
     #[test]
     fn at_for_unbounded_dimension() {

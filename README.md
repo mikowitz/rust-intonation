@@ -113,21 +113,23 @@ The possible bounding rules are:
 ### Constructing a Lattice
 
 ```rust
-use rust_intonation::lattice::{Lattice, LatticeDimensions, LatticeDimensionBounds};
-use LatticeDimensionBounds::*;
+use rust_intonation::{
+    lattice::{Lattice, LatticeDimensions, LatticeDimensionBounds},
+    ratio::Ratio
+};
 
 let lattice = Lattice::new(
     vec![
         LatticeDimension::new(
-            Ratio::new(3, 2)
+            Ratio::new(3, 2),
             LatticeDimensionBounds::Infinite,
         ),
         LatticeDimension::new(
-            Ratio::new(5, 4)
+            Ratio::new(5, 4),
             LatticeDimensionBounds::Infinite,
         ),
         LatticeDimension::new(
-            Ratio::new(7, 4)
+            Ratio::new(7, 4),
             LatticeDimensionBounds::Infinite,
         ),
     ]
@@ -142,6 +144,40 @@ lattice.at([1, 0, 0]); // Ratio::new(3, 2)
 lattice.at([1, 1, 0]); // Ratio::new(15, 8)
 lattice.at([1, 1, 1]); // Ratio::new(105, 32)
 lattice.at([-1, -1,- 1]); // Ratio::new(256, 105)
+```
+
+**NB** By default, `rust-intonation` uses 32-bit integers, so with a large enough lattice
+and high enough indices, it *is* possible to encounter integer overflow.
+However, since the largest possible 32-bit integer is `2,147,483,647`, this limit
+should be sufficient for all but the most extreme cases.
+
+#### Avoiding integer overflow
+
+If you need to be able to work with larger ratio components, it is possible to construct
+a `Lattice` using 64-bit integers by explicitly instantiating the Lattice with `<T = i64>`
+
+```rust
+use rust_intonation::{
+    lattice::{Lattice, LatticeDimensions, LatticeDimensionBounds},
+    ratio::Ratio
+};
+
+let lattice: Lattice<i64> = Lattice::new(
+    vec![
+        LatticeDimension::new(
+            Ratio::new(3, 2),
+            LatticeDimensionBounds::Infinite,
+        ),
+        LatticeDimension::new(
+            Ratio::new(5, 4),
+            LatticeDimensionBounds::Infinite,
+        ),
+        LatticeDimension::new(
+            Ratio::new(7, 4),
+            LatticeDimensionBounds::Infinite,
+        ),
+    ]
+);
 ```
 
 ## CLI

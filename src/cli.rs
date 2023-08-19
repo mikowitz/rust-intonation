@@ -74,15 +74,15 @@ enum SubCommand {
 pub fn run() {
     let args = Cli::parse();
     match args.cmd {
-        SubCommand::Diamond { limits } => println!("{}", Diamond::new(limits).display()),
+        SubCommand::Diamond { limits } => println!("{}", Diamond::<i32>::new(limits)),
         SubCommand::Lattice { ratios, indices } => {
             let ratios = parse_ratios(ratios);
             let indices = parse_indices(indices);
 
-            let lattice_dimensions = ratios
+            let lattice_dimensions: Vec<LatticeDimension<i32>> = ratios
                 .iter()
                 .map(|r| LatticeDimension::new(*r, Infinite))
-                .collect::<Vec<LatticeDimension>>();
+                .collect();
 
             let lattice = Lattice::new(lattice_dimensions);
 
@@ -98,7 +98,7 @@ pub fn run() {
     }
 }
 
-fn print_ratio(ratio: Ratio) {
+fn print_ratio(ratio: Ratio<i32>) {
     println!(
         "{}\t{:?}",
         ratio,
@@ -114,12 +114,12 @@ fn parse_index(s: &str) -> Vec<i32> {
     s.split(',').map(|n| n.parse().unwrap()).collect()
 }
 
-fn parse_ratios(ratios: Vec<String>) -> Vec<Ratio> {
+fn parse_ratios(ratios: Vec<String>) -> Vec<Ratio<i32>> {
     ratios.iter().map(|r| parse_ratio(r)).collect()
 }
 
-fn parse_ratio(s: &str) -> Ratio {
-    let parts = s.split('/').collect::<Vec<&str>>();
+fn parse_ratio(s: &str) -> Ratio<i32> {
+    let parts: Vec<&str> = s.split('/').collect();
     let numer: i32 = parts[0].parse().unwrap();
     let denom: i32 = parts[1].parse().unwrap();
     Ratio::new(numer, denom)

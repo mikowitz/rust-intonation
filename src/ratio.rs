@@ -5,63 +5,31 @@ use crate::{
     interval::ApproximateEqualTemperedInterval,
     math::{greatest_prime_factor, reduce},
 };
+use num::traits::PrimInt;
 use std::{
     fmt::Display,
     ops::{Div, Mul, Neg},
 };
 
-/// Models a ratio of two integers, defining an interval in just intonation.
+/// Models a ratio of two integral types, defining an interval in just intonation.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Ratio {
-    pub numer: i32,
-    pub denom: i32,
+pub struct Ratio<T: PrimInt> {
+    pub numer: T,
+    pub denom: T,
 }
 
-impl Display for Ratio {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}/{}", self.numer, self.denom)
-    }
-}
+/// Default i32 implementation of [Ratio]
+// pub type Ratio = Ratio<i32>;
 
-impl From<(i32, i32)> for Ratio {
-    fn from(value: (i32, i32)) -> Self {
+impl<T: PrimInt> From<(T, T)> for Ratio<T> {
+    fn from(value: (T, T)) -> Self {
         let (n, d) = value;
         Self::new(n, d)
     }
 }
 
-impl Neg for Ratio {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        self.complement()
-    }
-}
-
-impl Mul<Ratio> for Ratio {
-    type Output = Self;
-
-    fn mul(self, rhs: Ratio) -> Self::Output {
-        Self::Output::new(self.numer * rhs.numer, self.denom * rhs.denom)
-    }
-}
-
-impl Div<Ratio> for Ratio {
-    type Output = Self;
-
-    fn div(self, rhs: Ratio) -> Self::Output {
-        Self::Output::new(self.numer * rhs.denom, self.denom * rhs.numer)
-    }
-}
-
-impl From<&Ratio> for f32 {
-    fn from(value: &Ratio) -> Self {
-        value.numer as f32 / value.denom as f32
-    }
-}
-
-impl Ratio {
-    /// Construct a new [Ratio] from two [i32].
+impl<T: PrimInt> Ratio<T> {
+    /// Construct a new [Ratio] from two integers.
     ///
     /// ## Examples
     ///
@@ -77,7 +45,7 @@ impl Ratio {
     /// assert_eq!(r.numer, 1);
     /// assert_eq!(r.denom, 2);
     /// ```
-    pub fn new(numer: i32, denom: i32) -> Self {
+    pub fn new(numer: T, denom: T) -> Self {
         let (numer, denom) = reduce(numer, denom);
         Self { numer, denom }
     }
@@ -98,11 +66,12 @@ impl Ratio {
     /// assert_eq!(r.normalize(), Ratio::new(1, 1));
     /// ```
     pub fn normalize(&self) -> Self {
-        let f: f32 = self.into();
+        let f: f64 = self.into();
+        let two: T = num::cast(2i32).unwrap();
 
         match f {
-            f if f < 1. => Self::new(self.numer * 2, self.denom).normalize(),
-            f if f >= 2. => Self::new(self.numer, self.denom * 2).normalize(),
+            f if f < 1. => Self::new(self.numer * two, self.denom).normalize(),
+            f if f >= 2. => Self::new(self.numer, self.denom * two).normalize(),
             _ => Self::new(self.numer, self.denom),
         }
     }
@@ -117,7 +86,8 @@ impl Ratio {
     /// assert_eq!(r.complement(), Ratio::new(4, 3));
     /// ```
     pub fn complement(&self) -> Self {
-        (Self::new(2, 1) / *self).normalize()
+        let two: T = num::cast(2).unwrap();
+        (Self::new(two, num::one()) / *self).normalize()
     }
 
     /// Raises the given [Ratio] to the given integral power
@@ -134,7 +104,7 @@ impl Ratio {
     /// ```
     pub fn pow(&self, exp: i32) -> Self {
         match exp {
-            e if e == 0 => Self::new(1, 1),
+            e if e == 0 => Self::new(num::one(), num::one()),
             e if e < 0 => self.complement().pow(-exp),
             _ => Self::new(self.numer.pow(exp as u32), self.denom.pow(exp as u32)).normalize(),
         }
@@ -151,7 +121,7 @@ impl Ratio {
     /// let r = Ratio::new(3, 2);
     /// assert_eq!(
     ///   r.to_approximate_equal_tempered_interval(),
-    ///   (EqualTemperedInterval::PerfectFifth, 1.954956)
+    ///   (EqualTemperedInterval::PerfectFifth, 1.955000865387433)
     /// );
     /// ```
     /// This shows that a JI ratio of 3/2 is approximately 2 cents wider than an ET perfect 5th.
@@ -174,8 +144,46 @@ impl Ratio {
     /// let r = Ratio::new(81, 80);
     /// assert_eq!(r.limit(), 5);
     /// ```
-    pub fn limit(&self) -> i32 {
+    pub fn limit(&self) -> T {
         greatest_prime_factor(self.numer).max(greatest_prime_factor(self.denom))
+    }
+}
+
+impl<T: PrimInt + std::fmt::Display> Display for Ratio<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.numer, self.denom)
+    }
+}
+
+impl<T: PrimInt> Neg for Ratio<T> {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        self.complement()
+    }
+}
+
+impl<T: PrimInt> Mul<Ratio<T>> for Ratio<T> {
+    type Output = Self;
+
+    fn mul(self, rhs: Ratio<T>) -> Self::Output {
+        Ratio::<T>::new(self.numer * rhs.numer, self.denom * rhs.denom)
+    }
+}
+
+impl<T: PrimInt> Div<Ratio<T>> for Ratio<T> {
+    type Output = Self;
+
+    fn div(self, rhs: Ratio<T>) -> Self::Output {
+        Ratio::<T>::new(self.numer * rhs.denom, self.denom * rhs.numer)
+    }
+}
+
+impl<T: PrimInt> From<&Ratio<T>> for f64 {
+    fn from(value: &Ratio<T>) -> Self {
+        let n: f64 = num::cast(value.numer).unwrap();
+        let d: f64 = num::cast(value.denom).unwrap();
+        n / d
     }
 }
 
@@ -260,7 +268,7 @@ mod tests {
         let r = Ratio::new(3, 2);
         let i = r.to_approximate_equal_tempered_interval();
         assert_eq!(i.0, EqualTemperedInterval::PerfectFifth);
-        assert!((i.1 - 1.955).abs() < 0.001);
+        assert!((i.1 - 1.955).abs() < 0.0001);
     }
 
     #[test]
@@ -274,5 +282,19 @@ mod tests {
         assert_eq!(Ratio::new(3, 2).limit(), 3);
         assert_eq!(Ratio::new(5, 4).limit(), 5);
         assert_eq!(Ratio::new(8, 5).limit(), 5);
+    }
+
+    #[test]
+    #[should_panic]
+    fn i32_can_overflow() {
+        let r = Ratio::new(2147483647, 2147483646);
+        let _r2 = r * r;
+    }
+
+    #[test]
+    fn can_construct_i64_ratio() {
+        let r: Ratio<i64> = Ratio::new(2147483647, 2147483646);
+        let r2 = r * r;
+        assert_eq!(r2, Ratio::new(4611686014132420609, 4611686009837453316));
     }
 }
