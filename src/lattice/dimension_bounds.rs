@@ -19,7 +19,7 @@ pub enum LatticeDimensionBounds {
     LengthBounded(i32),
     /// Range bounded, the lattice extends through the range `[a, b]`.
     ///
-    /// Inedxing into the lattice at `b+1` will return the value at index `a`, and indexing into
+    /// Indexing into the lattice at `b+1` will return the value at index `a`, and indexing into
     /// the lattice at `a-'` will return the value at `b`.
     ///
     /// **N.B.**

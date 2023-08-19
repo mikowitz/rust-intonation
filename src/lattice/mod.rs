@@ -23,7 +23,7 @@ impl Lattice {
             .iter()
             .zip(indices.iter())
             .map(|(dim, &index)| dim.at(index))
-            .fold(Ratio::new(1, 1), |r, acc| r * acc)
+            .fold(Ratio::new(1, 1), |r, acc| acc * r)
     }
 }
 
