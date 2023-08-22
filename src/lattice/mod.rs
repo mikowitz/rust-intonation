@@ -36,6 +36,7 @@ mod tests {
     use super::*;
     use crate::lattice::dimension::LatticeDimension;
     use crate::ratio::Ratio;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn one_dimensional_unbounded_lattice() {

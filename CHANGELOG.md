@@ -1,5 +1,10 @@
 # rust_intonation
 
+## Unreleased
+
+* Add `Play` trait and implement using `rodio` for `Ratio` and `EqualTemperedInterval`
+* Add `play` and `compare` CLI subcommands
+
 ## v0.2.0 (August 22, 2023)
 
 * Make structs generic against `num::PrimInt` types

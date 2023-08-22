@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     name: "[stable] CI Tests"
     steps:
+      - run: sudo apt install -y --no-install-recommends libasound2-dev pkg-config
+
       - uses: actions/checkout@v3
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
