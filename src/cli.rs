@@ -1,7 +1,9 @@
 use crate::diamond::Diamond;
 use crate::lattice::{Lattice, LatticeDimension, LatticeDimensionBounds::*};
+use crate::play::Play;
 use crate::ratio::Ratio;
 use clap::{Parser, Subcommand};
+use std::time::Duration;
 
 #[derive(Parser, Debug)]
 #[clap(author = "Michael Berkowitz", version)]
@@ -23,6 +25,27 @@ struct Cli {
 
 #[derive(Subcommand, Debug, Clone)]
 enum SubCommand {
+    /// Play a given ratio as sine waves.
+    ///
+    /// Will play a root pitch (middle C), the result of
+    /// multiplying that root pitch by the ratio, and then
+    /// the two pitches together as a dyad.
+    ///
+    /// Ex. `rust-intonation play -r 3/2`
+    Play {
+        #[clap(short = 'r', long = "ratio")]
+        ratio: String,
+    },
+    /// Compare given ratio as sine waves with the nearest ET interval.
+    ///
+    /// Plays the same sequence as **play**, but will follow it by playing
+    /// the nearest ET interval to your ratio
+    ///
+    /// Ex. `rust-intonation compare -r 3/2`
+    Compare {
+        #[clap(short = 'r', long = "ratio")]
+        ratio: String,
+    },
     /// Construct a tonality diamond from the given limits.
     ///
     /// Displays a tonality diamond (otonalities on top, utonalities
@@ -74,6 +97,24 @@ enum SubCommand {
 pub fn run() {
     let args = Cli::parse();
     match args.cmd {
+        SubCommand::Play { ratio } => {
+            let ratio = parse_ratio(&ratio);
+            ratio.play();
+            //
+            // std::thread::sleep(Duration::from_secs_f32(0.5));
+            //
+            // let (et, _) = ratio.to_approximate_equal_tempered_interval();
+            // et.play()
+        }
+        SubCommand::Compare { ratio } => {
+            let ratio = parse_ratio(&ratio);
+            ratio.play();
+
+            std::thread::sleep(Duration::from_secs_f32(0.5));
+
+            let (et, _) = ratio.to_approximate_equal_tempered_interval();
+            et.play()
+        }
         SubCommand::Diamond { limits } => println!("{}", Diamond::<i32>::new(limits)),
         SubCommand::Lattice { ratios, indices } => {
             let ratios = parse_ratios(ratios);

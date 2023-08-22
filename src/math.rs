@@ -37,6 +37,7 @@ pub(crate) fn greatest_prime_factor<T: PrimInt>(a: T) -> T {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_greatest_prime_factor() {

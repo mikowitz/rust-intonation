@@ -1,5 +1,6 @@
 //! Operations for converting between JI ratios and approximations of ET (cent-based) intervals
 
+use crate::play::{play_dyad, Play};
 use crate::ratio::Ratio;
 use num::traits::PrimInt;
 
@@ -34,6 +35,36 @@ pub enum EqualTemperedInterval {
     MajorSixth,
     MinorSeventh,
     MajorSeventh,
+}
+
+impl Play for EqualTemperedInterval {
+    fn play(&self) {
+        let middle_c = 440. * 2.0_f32.powf(-9. / 12.);
+        let et_steps: usize = self.into();
+        let et_steps = et_steps as f32;
+        let et_freq = middle_c * 2f32.powf(1. / 12.).powf(et_steps);
+
+        play_dyad(middle_c, et_freq);
+    }
+}
+
+impl From<&EqualTemperedInterval> for usize {
+    fn from(value: &EqualTemperedInterval) -> Self {
+        match value {
+            EqualTemperedInterval::PerfectUnison => 0,
+            EqualTemperedInterval::MinorSecond => 1,
+            EqualTemperedInterval::MajorSecond => 2,
+            EqualTemperedInterval::MinorThird => 3,
+            EqualTemperedInterval::MajorThird => 4,
+            EqualTemperedInterval::PerfectFourth => 5,
+            EqualTemperedInterval::AugmentedFourth => 6,
+            EqualTemperedInterval::PerfectFifth => 7,
+            EqualTemperedInterval::MinorSixth => 8,
+            EqualTemperedInterval::MajorSixth => 9,
+            EqualTemperedInterval::MinorSeventh => 10,
+            EqualTemperedInterval::MajorSeventh => 11,
+        }
+    }
 }
 
 impl From<f64> for EqualTemperedInterval {
@@ -75,6 +106,7 @@ impl<T: PrimInt> From<Ratio<T>> for ApproximateEqualTemperedInterval {
 mod tests {
     use super::*;
     use crate::ratio::Ratio;
+    use pretty_assertions::assert_eq;
     use EqualTemperedInterval::*;
 
     #[test]

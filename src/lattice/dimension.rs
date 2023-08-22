@@ -28,6 +28,7 @@ mod tests {
     use super::LatticeDimensionBounds::*;
     use super::*;
     use crate::ratio::Ratio;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn at_for_unbounded_dimension() {

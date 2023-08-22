@@ -4,8 +4,10 @@
 use crate::{
     interval::ApproximateEqualTemperedInterval,
     math::{greatest_prime_factor, reduce},
+    play::{play_dyad, play_interval, Play},
 };
 use num::traits::PrimInt;
+use std::time::Duration;
 use std::{
     fmt::Display,
     ops::{Div, Mul, Neg},
@@ -16,16 +18,6 @@ use std::{
 pub struct Ratio<T: PrimInt> {
     pub numer: T,
     pub denom: T,
-}
-
-/// Default i32 implementation of [Ratio]
-// pub type Ratio = Ratio<i32>;
-
-impl<T: PrimInt> From<(T, T)> for Ratio<T> {
-    fn from(value: (T, T)) -> Self {
-        let (n, d) = value;
-        Self::new(n, d)
-    }
 }
 
 impl<T: PrimInt> Ratio<T> {
@@ -149,6 +141,21 @@ impl<T: PrimInt> Ratio<T> {
     }
 }
 
+impl<T: PrimInt> Play for Ratio<T> {
+    fn play(&self) {
+        // let middle_c = 261.625565;
+        let middle_c = 440. * 2.0_f32.powf(-9. / 12.);
+        let r: f64 = self.into();
+        let ratio_freq = middle_c * r as f32;
+
+        play_interval(middle_c, ratio_freq);
+
+        std::thread::sleep(Duration::from_secs_f32(0.25));
+
+        play_dyad(middle_c, ratio_freq);
+    }
+}
+
 impl<T: PrimInt + std::fmt::Display> Display for Ratio<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}/{}", self.numer, self.denom)
@@ -187,10 +194,18 @@ impl<T: PrimInt> From<&Ratio<T>> for f64 {
     }
 }
 
+impl<T: PrimInt> From<(T, T)> for Ratio<T> {
+    fn from(value: (T, T)) -> Self {
+        let (n, d) = value;
+        Self::new(n, d)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::interval::EqualTemperedInterval;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn new_simple_ratio() {
