@@ -1,6 +1,6 @@
 # rust_intonation
 
-## Unreleased
+## v0.3.0 (August 23, 2023)
 
 * Add `Play` trait and implement using `rodio` for `Ratio` and `EqualTemperedInterval`
 * Add `play` and `compare` CLI subcommands
