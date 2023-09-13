@@ -22,7 +22,7 @@ ji_interval! { OCTAVE 2/1 }
 ji_interval! { SYNTONIC_COMMA 81/80 }
 
 #[derive(Debug, PartialEq)]
-pub enum EqualTemperedInterval {
+pub enum TwelveEDOInterval {
     PerfectUnison,
     MinorSecond,
     MajorSecond,
@@ -37,7 +37,7 @@ pub enum EqualTemperedInterval {
     MajorSeventh,
 }
 
-impl Play for EqualTemperedInterval {
+impl Play for TwelveEDOInterval {
     fn play(&self) {
         let middle_c = 440. * 2.0_f32.powf(-9. / 12.);
         let et_steps: usize = self.into();
@@ -48,26 +48,26 @@ impl Play for EqualTemperedInterval {
     }
 }
 
-impl From<&EqualTemperedInterval> for usize {
-    fn from(value: &EqualTemperedInterval) -> Self {
+impl From<&TwelveEDOInterval> for usize {
+    fn from(value: &TwelveEDOInterval) -> Self {
         match value {
-            EqualTemperedInterval::PerfectUnison => 0,
-            EqualTemperedInterval::MinorSecond => 1,
-            EqualTemperedInterval::MajorSecond => 2,
-            EqualTemperedInterval::MinorThird => 3,
-            EqualTemperedInterval::MajorThird => 4,
-            EqualTemperedInterval::PerfectFourth => 5,
-            EqualTemperedInterval::AugmentedFourth => 6,
-            EqualTemperedInterval::PerfectFifth => 7,
-            EqualTemperedInterval::MinorSixth => 8,
-            EqualTemperedInterval::MajorSixth => 9,
-            EqualTemperedInterval::MinorSeventh => 10,
-            EqualTemperedInterval::MajorSeventh => 11,
+            TwelveEDOInterval::PerfectUnison => 0,
+            TwelveEDOInterval::MinorSecond => 1,
+            TwelveEDOInterval::MajorSecond => 2,
+            TwelveEDOInterval::MinorThird => 3,
+            TwelveEDOInterval::MajorThird => 4,
+            TwelveEDOInterval::PerfectFourth => 5,
+            TwelveEDOInterval::AugmentedFourth => 6,
+            TwelveEDOInterval::PerfectFifth => 7,
+            TwelveEDOInterval::MinorSixth => 8,
+            TwelveEDOInterval::MajorSixth => 9,
+            TwelveEDOInterval::MinorSeventh => 10,
+            TwelveEDOInterval::MajorSeventh => 11,
         }
     }
 }
 
-impl From<f64> for EqualTemperedInterval {
+impl From<f64> for TwelveEDOInterval {
     fn from(value: f64) -> Self {
         match (value / 100.) % 12. {
             n if n == 0. => Self::PerfectUnison,
@@ -89,7 +89,7 @@ impl From<f64> for EqualTemperedInterval {
 
 /// Describes the approximation of an equal tempered interval as a tuple
 /// pair of the named ET interval and a difference from ET, given in cents.
-pub type ApproximateEqualTemperedInterval = (EqualTemperedInterval, f64);
+pub type ApproximateEqualTemperedInterval = (TwelveEDOInterval, f64);
 
 impl<T: PrimInt> From<Ratio<T>> for ApproximateEqualTemperedInterval {
     fn from(value: Ratio<T>) -> Self {
@@ -107,7 +107,7 @@ mod tests {
     use super::*;
     use crate::ratio::Ratio;
     use pretty_assertions::assert_eq;
-    use EqualTemperedInterval::*;
+    use TwelveEDOInterval::*;
 
     #[test]
     fn unison_and_octaves() {
