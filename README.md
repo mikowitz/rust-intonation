@@ -18,6 +18,13 @@ let r1 = Ratio::new(3, 2);
 let r2 = Ratio::new(5, 4);
 ```
 
+Creating a new ratio will normalize it to the range `[1, 2)`
+
+```rust
+Ratio::new(1, 2); // Ratio::new(1, 1)
+Ratio::new(25, 7); // Ratio::new(25, 14)
+```
+
 They can be multiplied and divided with the expected results
 
 ```rust
@@ -25,13 +32,6 @@ r1 * r2; // Ratio::new(15, 8);
 
 r1 / r2; // Ratio::new(6, 5)
 r2 / r1; // Ratio::new(5, 6)
-```
-
-They can be normalized to the range `[1, 2)`
-
-```rust
-Ratio::new(1, 2).normalize(); // Ratio::new(1, 1)
-Ratio::new(25, 7).normalize(); // Ratio::new(25, 14)
 ```
 
 They can be raised to an integral power (positive or negative)

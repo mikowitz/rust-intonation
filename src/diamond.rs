@@ -42,7 +42,7 @@ impl<T: PrimInt> Diamond<T> {
     fn construct_ratios_with_denominator(&self, denominator: i32) -> Vec<Ratio<i32>> {
         self.identities
             .iter()
-            .map(|n| Ratio::new(*n as i32, denominator).normalize())
+            .map(|n| Ratio::new(*n as i32, denominator))
             .collect()
     }
 

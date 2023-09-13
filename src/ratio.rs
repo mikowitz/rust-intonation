@@ -3,7 +3,7 @@
 
 use crate::{
     interval::ApproximateEqualTemperedInterval,
-    math::{greatest_prime_factor, reduce},
+    math::{greatest_prime_factor, normalize_pair, reduce},
     play::{play_dyad, play_interval, Play},
 };
 use num::traits::PrimInt;
@@ -29,43 +29,18 @@ impl<T: PrimInt> Ratio<T> {
     /// # use rust_intonation::ratio::Ratio;
     /// let r = Ratio::new(3, 2);
     /// ```
-    /// [`Ratio::new()`] will reduce the given fraction to its smallest representation
+    /// [`Ratio::new()`] will normalize the given fraction to fall within the octave [1, 2)
     ///
     /// ```rust
     /// # use rust_intonation::ratio::Ratio;
-    /// let r = Ratio::new(5, 10);
-    /// assert_eq!(r.numer, 1);
-    /// assert_eq!(r.denom, 2);
+    /// let r = Ratio::new(14, 4);
+    /// assert_eq!(r.numer, 7);
+    /// assert_eq!(r.denom, 4);
     /// ```
     pub fn new(numer: T, denom: T) -> Self {
+        let (numer, denom) = normalize_pair(numer, denom);
         let (numer, denom) = reduce(numer, denom);
         Self { numer, denom }
-    }
-
-    /// Normalizes the [Ratio] to an absolute value in the range [1, 2)
-    ///
-    /// ## Examples
-    ///
-    /// ```rust
-    /// # use rust_intonation::ratio::Ratio;
-    /// let r = Ratio::new(1, 2);
-    /// assert_eq!(r.normalize(), Ratio::new(1, 1));
-    /// ```
-    ///
-    /// ```rust
-    /// # use rust_intonation::ratio::Ratio;
-    /// let r = Ratio::new(2, 1);
-    /// assert_eq!(r.normalize(), Ratio::new(1, 1));
-    /// ```
-    pub fn normalize(&self) -> Self {
-        let f: f64 = self.into();
-        let two: T = num::cast(2i32).unwrap();
-
-        match f {
-            f if f < 1. => Self::new(self.numer * two, self.denom).normalize(),
-            f if f >= 2. => Self::new(self.numer, self.denom * two).normalize(),
-            _ => Self::new(self.numer, self.denom),
-        }
     }
 
     /// Returns the [Ratio] that, when multiplied by the given argument, gives `2/1`.
@@ -79,7 +54,7 @@ impl<T: PrimInt> Ratio<T> {
     /// ```
     pub fn complement(&self) -> Self {
         let two: T = num::cast(2).unwrap();
-        (Self::new(two, num::one()) / *self).normalize()
+        Self::new(two, num::one()) / *self
     }
 
     /// Raises the given [Ratio] to the given integral power
@@ -98,7 +73,7 @@ impl<T: PrimInt> Ratio<T> {
         match exp {
             e if e == 0 => Self::new(num::one(), num::one()),
             e if e < 0 => self.complement().pow(-exp),
-            _ => Self::new(self.numer.pow(exp as u32), self.denom.pow(exp as u32)).normalize(),
+            _ => Self::new(self.numer.pow(exp as u32), self.denom.pow(exp as u32)),
         }
     }
 
@@ -174,7 +149,7 @@ impl<T: PrimInt> Mul<Ratio<T>> for Ratio<T> {
     type Output = Self;
 
     fn mul(self, rhs: Ratio<T>) -> Self::Output {
-        Ratio::<T>::new(self.numer * rhs.numer, self.denom * rhs.denom)
+        Self::new(self.numer * rhs.numer, self.denom * rhs.denom)
     }
 }
 
@@ -182,7 +157,7 @@ impl<T: PrimInt> Div<Ratio<T>> for Ratio<T> {
     type Output = Self;
 
     fn div(self, rhs: Ratio<T>) -> Self::Output {
-        Ratio::<T>::new(self.numer * rhs.denom, self.denom * rhs.numer)
+        Self::new(self.numer * rhs.denom, self.denom * rhs.numer)
     }
 }
 
@@ -221,15 +196,6 @@ mod tests {
 
         assert_eq!(r.numer, 3);
         assert_eq!(r.denom, 2);
-    }
-
-    #[test]
-    fn normalize() {
-        let r1 = Ratio::new(1, 2);
-        let r2 = Ratio::new(9, 4);
-
-        assert_eq!(r1.normalize(), Ratio::new(1, 1));
-        assert_eq!(r2.normalize(), Ratio::new(9, 8));
     }
 
     #[test]
