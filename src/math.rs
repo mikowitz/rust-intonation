@@ -1,5 +1,24 @@
 use num::{traits::PrimInt, zero};
 
+pub(crate) fn normalize_pair<T: PrimInt>(a: T, b: T) -> (T, T) {
+    let f: f32 = num::cast(a / b).unwrap();
+    let two: T = num::cast(2i32).unwrap();
+
+    match f {
+        f if f < 1. => normalize_pair(a * two, b),
+        f if f >= 2. => normalize_pair(a, b * two),
+        _ => (a, b),
+    }
+}
+// let f: f64 = self.into();
+// let two: T = num::cast(2i32).unwrap();
+//
+// match f {
+//     f if f < 1. => Self::new(self.numer * two, self.denom),
+//     f if f >= 2. => Self::new(self.numer, self.denom * two),
+//     _ => Self::new(self.numer, self.denom),
+// }
+
 pub(crate) fn reduce<T: PrimInt>(a: T, b: T) -> (T, T) {
     let g = gcd(a, b);
     (a / g, b / g)

@@ -93,7 +93,7 @@ pub type ApproximateEqualTemperedInterval = (TwelveEDOInterval, f64);
 
 impl<T: PrimInt> From<Ratio<T>> for ApproximateEqualTemperedInterval {
     fn from(value: Ratio<T>) -> Self {
-        let f: f64 = (&value.normalize()).into();
+        let f: f64 = (&value).into();
         let ji_cents: f64 = 1200. * f.log2();
 
         let et_cents = (ji_cents / 100.).round() * 100.;
