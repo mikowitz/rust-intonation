@@ -71,7 +71,7 @@ impl<T: PrimInt> Ratio<T> {
     /// ```
     pub fn pow(&self, exp: i32) -> Self {
         match exp {
-            e if e == 0 => Self::new(num::one(), num::one()),
+            0 => Self::new(num::one(), num::one()),
             e if e < 0 => self.complement().pow(-exp),
             _ => Self::new(self.numer.pow(exp as u32), self.denom.pow(exp as u32)),
         }

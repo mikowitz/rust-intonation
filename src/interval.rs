@@ -43,7 +43,7 @@ impl Play for TwelveEDOInterval {
         let middle_c = 440. * 2.0_f32.powf(-9. / 12.);
         let et_steps: usize = self.into();
         let et_steps = et_steps as f32;
-        let et_freq = middle_c * 2f32.powf(1. / 12.).powf(et_steps);
+        let et_freq = middle_c * 2f32.powf(et_steps / 12.);
 
         play_dyad(middle_c, et_freq);
     }
