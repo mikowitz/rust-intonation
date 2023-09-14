@@ -1,8 +1,11 @@
+//! Helpers for playback via [rodio](https://docs.rs/rodio).
 use rodio::{
     source::{Amplify, SineWave, Source, TakeDuration},
     OutputStream, Sink,
 };
 use std::time::Duration;
+
+/// Trait to allow playback using [rodio](https://docs.rs/rodio).
 pub trait Play {
     fn play(&self);
 }

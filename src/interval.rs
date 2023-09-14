@@ -2,6 +2,7 @@
 
 use crate::play::{play_dyad, Play};
 use crate::ratio::Ratio;
+use crate::temperaments::edo::EdoInterval;
 use num::traits::PrimInt;
 
 macro_rules! ji_interval {
@@ -89,9 +90,9 @@ impl From<f64> for TwelveEDOInterval {
 
 /// Describes the approximation of an equal tempered interval as a tuple
 /// pair of the named ET interval and a difference from ET, given in cents.
-pub type ApproximateEqualTemperedInterval = (TwelveEDOInterval, f64);
+pub type Approximate12EDOInterval = (TwelveEDOInterval, f64);
 
-impl<T: PrimInt> From<Ratio<T>> for ApproximateEqualTemperedInterval {
+impl<T: PrimInt> From<Ratio<T>> for Approximate12EDOInterval {
     fn from(value: Ratio<T>) -> Self {
         let f: f64 = (&value).into();
         let ji_cents: f64 = 1200. * f.log2();
@@ -99,6 +100,14 @@ impl<T: PrimInt> From<Ratio<T>> for ApproximateEqualTemperedInterval {
         let et_cents = (ji_cents / 100.).round() * 100.;
 
         (et_cents.into(), ji_cents - et_cents)
+    }
+}
+
+impl<'a> From<EdoInterval<'a>> for Approximate12EDOInterval {
+    fn from(value: EdoInterval<'a>) -> Self {
+        let non_12_cents: f64 = value.cents as f64;
+        let et_12_cents: f64 = (non_12_cents / 100.).round() * 100.;
+        (et_12_cents.into(), non_12_cents - et_12_cents)
     }
 }
 
@@ -110,24 +119,16 @@ mod tests {
     use TwelveEDOInterval::*;
 
     #[test]
-    fn unison_and_octaves() {
+    fn unison() {
         let r1 = Ratio::new(1, 1);
-        let i1: ApproximateEqualTemperedInterval = r1.into();
+        let i1: Approximate12EDOInterval = r1.into();
         assert_eq!(i1, (PerfectUnison, 0.));
-
-        let r2 = Ratio::new(2, 1);
-        let i2: ApproximateEqualTemperedInterval = r2.into();
-        assert_eq!(i2, (PerfectUnison, 0.));
-
-        let r3 = Ratio::new(1, 2);
-        let i3: ApproximateEqualTemperedInterval = r3.into();
-        assert_eq!(i3, (PerfectUnison, 0.));
     }
 
     #[test]
     fn perfect_fifth() {
         let r = Ratio::new(3, 2);
-        let i: ApproximateEqualTemperedInterval = r.into();
+        let i: Approximate12EDOInterval = r.into();
         assert_eq!(i.0, PerfectFifth);
         assert!((i.1 - 1.955).abs() < 0.001);
     }

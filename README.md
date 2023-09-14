@@ -21,6 +21,7 @@ let r2 = Ratio::new(5, 4);
 Creating a new ratio will normalize it to the range `[1, 2)`
 
 ```rust
+# use rust_intonation::ratio::Ratio;
 Ratio::new(1, 2); // Ratio::new(1, 1)
 Ratio::new(25, 7); // Ratio::new(25, 14)
 ```
@@ -28,6 +29,9 @@ Ratio::new(25, 7); // Ratio::new(25, 14)
 They can be multiplied and divided with the expected results
 
 ```rust
+# use rust_intonation::ratio::Ratio;
+# let r1 = Ratio::new(3, 2);
+# let r2 = Ratio::new(5, 4);
 r1 * r2; // Ratio::new(15, 8);
 
 r1 / r2; // Ratio::new(6, 5)
@@ -37,6 +41,7 @@ r2 / r1; // Ratio::new(5, 6)
 They can be raised to an integral power (positive or negative)
 
 ```rust
+# use rust_intonation::ratio::Ratio;
 Ratio::new(3, 2).pow(0); // Ratio::new(1, 1)
 Ratio::new(3, 2).pow(2); // Ratio::new(9, 8)
 Ratio::new(3, 2).pow(-2); // Ratio::new(16, 9)
@@ -46,21 +51,24 @@ Their complement can be calculated (given a ratio `r`, its complement
 is the ratio `s` such that `r * s` forms a perfect octave)
 
 ```rust
+# use rust_intonation::ratio::Ratio;
 Ratio::new(3, 2).complement(); // Ratio::new(4, 3)
 Ratio::new(10, 9).complement(); // Ratio::new(9, 5)
 ```
 
-An equal temperament approximation of a JI ratio can be calculated,
+An 12 EDO equal temperament approximation of a JI ratio can be calculated,
 as well as the difference in cents between the JI ratio and the ET
 interval.
 
 ```rust
-Ratio::new(3, 2).to_approximate_equal_tempered_interval(); // (PerfectFifth, 1.954956)
+# use rust_intonation::ratio::Ratio;
+Ratio::new(3, 2).to_approximate_12_edo_interval(); // (PerfectFifth, 1.954956)
 ```
 
 The highest prime limit of the ratio can be calculated
 
 ```rust
+# use rust_intonation::ratio::Ratio;
 Ratio::new(3, 2).limit(); // 3
 Ratio::new(5, 4).limit(); // 5
 Ratio::new(8, 5).limit(); // 5
@@ -73,16 +81,18 @@ A tonality diamond can be constructed from a vector of integer limits
 ```rust
 use rust_intonation::diamond::Diamond;
 
-let diamond = Diamond::new(vec![1, 5, 3]);
+let diamond: Diamond<i32> = Diamond::new(vec![1, 5, 3]);
 ```
 
 The diamond can then be printed out with otonalities on the top, and
 utonalities on the bottom:
 
 ```rust
-println!("{}", diamond.display());
+# use rust_intonation::diamond::Diamond;
+# let diamond: Diamond<i32> = Diamond::new(vec![1, 5, 3]);
+println!("{}", diamond);
 ```
-```
+```bash
                 3/2
 
         5/4             6/5
@@ -114,7 +124,7 @@ The possible bounding rules are:
 
 ```rust
 use rust_intonation::{
-    lattice::{Lattice, LatticeDimensions, LatticeDimensionBounds},
+    lattice::{Lattice, LatticeDimension, LatticeDimensionBounds},
     ratio::Ratio
 };
 
@@ -139,11 +149,31 @@ let lattice = Lattice::new(
 You can then index into the lattice to return the ratio at the given coordinates:
 
 ```rust
-lattice.at([0, 0, 0]); // Ratio::new(1, 1)
-lattice.at([1, 0, 0]); // Ratio::new(3, 2)
-lattice.at([1, 1, 0]); // Ratio::new(15, 8)
-lattice.at([1, 1, 1]); // Ratio::new(105, 32)
-lattice.at([-1, -1,- 1]); // Ratio::new(256, 105)
+# use rust_intonation::{
+#     lattice::{Lattice, LatticeDimension, LatticeDimensionBounds},
+#     ratio::Ratio
+# };
+# let lattice = Lattice::new(
+#     vec![
+#         LatticeDimension::new(
+#             Ratio::new(3, 2),
+#             LatticeDimensionBounds::Infinite,
+#         ),
+#         LatticeDimension::new(
+#             Ratio::new(5, 4),
+#             LatticeDimensionBounds::Infinite,
+#         ),
+#         LatticeDimension::new(
+#             Ratio::new(7, 4),
+#             LatticeDimensionBounds::Infinite,
+#         ),
+#     ]
+# );
+lattice.at(&[0, 0, 0]); // Ratio::new(1, 1)
+lattice.at(&[1, 0, 0]); // Ratio::new(3, 2)
+lattice.at(&[1, 1, 0]); // Ratio::new(15, 8)
+lattice.at(&[1, 1, 1]); // Ratio::new(105, 32)
+lattice.at(&[-1, -1,- 1]); // Ratio::new(256, 105)
 ```
 
 **NB** By default, `rust-intonation` uses 32-bit integers, so with a large enough lattice
@@ -158,7 +188,7 @@ a `Lattice` using 64-bit integers by explicitly instantiating the Lattice with `
 
 ```rust
 use rust_intonation::{
-    lattice::{Lattice, LatticeDimensions, LatticeDimensionBounds},
+    lattice::{Lattice, LatticeDimension, LatticeDimensionBounds},
     ratio::Ratio
 };
 
@@ -236,5 +266,37 @@ $ rust-intonation lattice --ratios 3/2 5/4 7/4 --indices 1,1,1 2,2,2 -1,0,1
 7/3     (MinorThird, -33.12915)
 ```
 
-**NB** that each n-dimensional index coordinate set is comma-separated, but
+**NB** each n-dimensional index coordinate set is comma-separated, but
 the different coordinates are separated by spaces.
+
+### play
+
+This command plays the given ratio as sine waves, based on middle C (C4). For example,
+the following command will play a JI perfect fifth.
+
+```bash
+$ rust-intonation play --ratio 3/2
+```
+
+### compare
+
+Similar to `play`, this command will play the given ratio as a pair of sine waves, but will follow it
+by playing the nearest 12EDO interval, also starting on middle C (C4).
+
+```bash
+$ rust-intonation play --ratio 3/2
+```
+
+### series
+
+Will print out the first N members of the harmonic series, showing the harmonic number,
+the ratio, and the nearest 12EDO interval.
+
+```bash
+$ rust-intonation series --limit 5
+5       5/4     (MajorThird, -13.686286135165176)
+4       1/1     (PerfectUnison, 0.0)
+3       3/2     (PerfectFifth, 1.955000865387433)
+2       1/1     (PerfectUnison, 0.0)
+1       1/1     (PerfectUnison, 0.0)
+```

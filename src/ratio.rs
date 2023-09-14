@@ -2,7 +2,7 @@
 //!
 
 use crate::{
-    interval::ApproximateEqualTemperedInterval,
+    interval::Approximate12EDOInterval,
     math::{greatest_prime_factor, normalize_pair, reduce},
     play::{play_dyad, play_interval, Play},
 };
@@ -87,12 +87,12 @@ impl<T: PrimInt> Ratio<T> {
     /// # use rust_intonation::interval::TwelveEDOInterval;
     /// let r = Ratio::new(3, 2);
     /// assert_eq!(
-    ///   r.to_approximate_equal_tempered_interval(),
+    ///   r.to_approximate_12_edo_interval(),
     ///   (TwelveEDOInterval::PerfectFifth, 1.955000865387433)
     /// );
     /// ```
     /// This shows that a JI ratio of 3/2 is approximately 2 cents wider than an ET perfect 5th.
-    pub fn to_approximate_equal_tempered_interval(&self) -> ApproximateEqualTemperedInterval {
+    pub fn to_approximate_12_edo_interval(&self) -> Approximate12EDOInterval {
         (*self).into()
     }
 
@@ -247,7 +247,7 @@ mod tests {
     #[test]
     fn to_modified_et_interval() {
         let r = Ratio::new(3, 2);
-        let i = r.to_approximate_equal_tempered_interval();
+        let i = r.to_approximate_12_edo_interval();
         assert_eq!(i.0, TwelveEDOInterval::PerfectFifth);
         assert!((i.1 - 1.955).abs() < 0.0001);
     }
