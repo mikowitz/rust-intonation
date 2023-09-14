@@ -2,7 +2,7 @@
 //!
 
 use crate::{
-    interval::ApproximateEqualTemperedInterval,
+    interval::Approximate12EDOInterval,
     math::{greatest_prime_factor, normalize_pair, reduce},
     play::{play_dyad, play_interval, Play},
 };
@@ -92,7 +92,7 @@ impl<T: PrimInt> Ratio<T> {
     /// );
     /// ```
     /// This shows that a JI ratio of 3/2 is approximately 2 cents wider than an ET perfect 5th.
-    pub fn to_approximate_equal_tempered_interval(&self) -> ApproximateEqualTemperedInterval {
+    pub fn to_approximate_equal_tempered_interval(&self) -> Approximate12EDOInterval {
         (*self).into()
     }
 
