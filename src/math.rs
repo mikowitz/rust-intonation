@@ -10,14 +10,6 @@ pub(crate) fn normalize_pair<T: PrimInt>(a: T, b: T) -> (T, T) {
         _ => (a, b),
     }
 }
-// let f: f64 = self.into();
-// let two: T = num::cast(2i32).unwrap();
-//
-// match f {
-//     f if f < 1. => Self::new(self.numer * two, self.denom),
-//     f if f >= 2. => Self::new(self.numer, self.denom * two),
-//     _ => Self::new(self.numer, self.denom),
-// }
 
 pub(crate) fn reduce<T: PrimInt>(a: T, b: T) -> (T, T) {
     let g = gcd(a, b);
