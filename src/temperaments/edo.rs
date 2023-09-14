@@ -1,9 +1,13 @@
 //! Functions and structs for generating temperaments that are made by equal divisions
 //! of the octave (EDO)
-use crate::interval::Approximate12EDOInterval;
+use crate::{
+    interval::Approximate12EDOInterval,
+    play::{play_dyad, Play},
+};
 
 /// Models an EDO that divides the octave into the given number of equal divisions.
 #[derive(Clone, Copy, Debug, PartialEq)]
+
 pub struct Edo {
     pub divisions: u32,
 }
@@ -33,7 +37,7 @@ impl Edo {
 impl<'a> EdoInterval<'a> {
     /// Calculates an interval of the given number of steps in a specified EDO temperament.
     ///
-    /// Sholud generally not be called directly. See [Edo::interval](crate::Edo::interval)
+    /// Should generally not be called directly. See [Edo::interval](crate::Edo::interval)
     pub fn new(edo: &'a Edo, steps: u32) -> EdoInterval<'a> {
         let cents = 1200. * (steps as f32) / (edo.divisions as f32);
         Self { edo, steps, cents }
@@ -47,11 +51,21 @@ impl<'a> EdoInterval<'a> {
     }
 }
 
+impl<'a> Play for EdoInterval<'a> {
+    fn play(&self) {
+        let middle_c = 440. * 2.0_f32.powf(-9. / 12.);
+        let edo_steps: usize = self.steps as usize;
+        let edo_steps = edo_steps as f32;
+        let edo_freq = middle_c * 2f32.powf(edo_steps / self.edo.divisions as f32);
+
+        play_dyad(middle_c, edo_freq);
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::interval::TwelveEDOInterval;
-
     use super::*;
+    use crate::interval::TwelveEDOInterval;
 
     #[test]
     fn interval() {

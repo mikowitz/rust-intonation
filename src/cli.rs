@@ -4,6 +4,8 @@ use crate::diamond::Diamond;
 use crate::lattice::{Lattice, LatticeDimension, LatticeDimensionBounds::*};
 use crate::play::Play;
 use crate::ratio::Ratio;
+use crate::temperaments::edo::EdoInterval;
+use crate::Edo;
 use clap::{Parser, Subcommand};
 use std::time::Duration;
 
@@ -102,6 +104,11 @@ enum SubCommand {
         #[clap(short = 'l', long = "limit")]
         limit: i32,
     },
+    /// Show the steps of an EDO as compared to 12 EDO
+    Edo {
+        #[clap(short = 'e', long = "edo", num_args = 1)]
+        edo: u32,
+    },
 }
 
 pub fn run() {
@@ -146,6 +153,18 @@ pub fn run() {
                 let r = Ratio::new(i, 1);
                 print!("{}\t", i);
                 print_ratio(r);
+            }
+        }
+        SubCommand::Edo { edo } => {
+            let edo = Edo::new(edo);
+            for steps in 0..=edo.divisions {
+                let int = EdoInterval::new(&edo, steps);
+                println!(
+                    "{}/{}\t{:?}",
+                    steps,
+                    edo.divisions,
+                    int.to_approximate_12_edo_interval()
+                );
             }
         }
     }
