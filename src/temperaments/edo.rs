@@ -1,10 +1,14 @@
+//! Functions and structs for generating temperaments that are made by equal divisions
+//! of the octave (EDO)
 use crate::interval::Approximate12EDOInterval;
 
+/// Models an EDO that divides the octave into the given number of equal divisions.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Edo {
     pub divisions: u32,
 }
 
+/// Models an interval of a given number of steps in a specified EDO temperament.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct EdoInterval<'a> {
     edo: &'a Edo,
@@ -13,10 +17,14 @@ pub struct EdoInterval<'a> {
 }
 
 impl Edo {
+    /// Create a new EDO temperament which divides the octave evenly into a given number of
+    /// divisions.
     pub fn new(divisions: u32) -> Self {
         Self { divisions }
     }
 
+    /// Returns an [interval][EdoInterval] that represents an interval of the given number of steps
+    /// in the subject EDO.
     pub fn interval(&self, steps: u32) -> EdoInterval {
         EdoInterval::new(self, steps)
     }
@@ -28,6 +36,9 @@ impl<'a> EdoInterval<'a> {
         Self { edo, steps, cents }
     }
 
+    /// Returns an approximation of the interval in 12 EDO temperament, giving the closest 12 EDO
+    /// interval name, and the number of cents by which the subject interval differs from that
+    /// interval.
     pub fn to_approximate_12_edo_interval(&self) -> Approximate12EDOInterval {
         (*self).into()
     }
