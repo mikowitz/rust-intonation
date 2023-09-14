@@ -1,3 +1,5 @@
+//! the rust-intonation CLI. See [rust-intonation][crate] for documentation.
+
 use crate::diamond::Diamond;
 use crate::lattice::{Lattice, LatticeDimension, LatticeDimensionBounds::*};
 use crate::play::Play;
@@ -92,6 +94,14 @@ enum SubCommand {
         #[clap(short = 'r', long = "ratio", num_args = 0..)]
         ratios: Vec<String>,
     },
+    /// Prints out the harmonic series from the given limit down to 1.
+    ///
+    /// Prints each harmonic as a JI ratio, along with the nearest 12EDO interval
+    /// and the cents difference between them
+    Series {
+        #[clap(short = 'l', long = "limit")]
+        limit: i32,
+    },
 }
 
 pub fn run() {
@@ -100,11 +110,6 @@ pub fn run() {
         SubCommand::Play { ratio } => {
             let ratio = parse_ratio(&ratio);
             ratio.play();
-            //
-            // std::thread::sleep(Duration::from_secs_f32(0.5));
-            //
-            // let (et, _) = ratio.to_approximate_equal_tempered_interval();
-            // et.play()
         }
         SubCommand::Compare { ratio } => {
             let ratio = parse_ratio(&ratio);
@@ -112,7 +117,7 @@ pub fn run() {
 
             std::thread::sleep(Duration::from_secs_f32(0.5));
 
-            let (et, _) = ratio.to_approximate_equal_tempered_interval();
+            let (et, _) = ratio.to_approximate_12_edo_interval();
             et.play()
         }
         SubCommand::Diamond { limits } => println!("{}", Diamond::<i32>::new(limits)),
@@ -136,15 +141,18 @@ pub fn run() {
                 print_ratio(ratio);
             }
         }
+        SubCommand::Series { limit } => {
+            for i in (1..=limit).rev() {
+                let r = Ratio::new(i, 1);
+                print!("{}\t", i);
+                print_ratio(r);
+            }
+        }
     }
 }
 
 fn print_ratio(ratio: Ratio<i32>) {
-    println!(
-        "{}\t{:?}",
-        ratio,
-        ratio.to_approximate_equal_tempered_interval()
-    );
+    println!("{}\t{:?}", ratio, ratio.to_approximate_12_edo_interval());
 }
 
 fn parse_indices(indices: Vec<String>) -> Vec<Vec<i32>> {

@@ -1,10 +1,12 @@
+//! Tools for constructing and displaying a tonality diamond from a set of prime limits.
 use num::PrimInt;
 
 use crate::ratio::Ratio;
 use std::{fmt::Display, marker::PhantomData};
 
+/// Models a tonality diamond with the given prime limits
 pub struct Diamond<T: PrimInt = i32> {
-    pub identities: Vec<u32>,
+    pub limits: Vec<u32>,
     phantom: PhantomData<T>,
 }
 
@@ -25,29 +27,29 @@ type Coordinate = (usize, usize);
 type Coordinates = Vec<Coordinate>;
 
 impl<T: PrimInt> Diamond<T> {
-    pub fn new(identities: Vec<u32>) -> Self {
+    pub fn new(limits: Vec<u32>) -> Self {
         Self {
-            identities,
+            limits,
             phantom: PhantomData::<T>,
         }
     }
 
     pub fn generate(&self) -> Vec<Vec<Ratio<i32>>> {
-        self.identities
+        self.limits
             .iter()
             .map(|d| self.construct_ratios_with_denominator(*d as i32))
             .collect()
     }
 
     fn construct_ratios_with_denominator(&self, denominator: i32) -> Vec<Ratio<i32>> {
-        self.identities
+        self.limits
             .iter()
             .map(|n| Ratio::new(*n as i32, denominator))
             .collect()
     }
 
     fn construct_diamond_row(&self, row: &[Coordinate], ratios: &[Vec<Ratio<i32>>]) -> String {
-        let prefix_len = self.identities.len() - row.len();
+        let prefix_len = self.limits.len() - row.len();
         let prefix = "\t".repeat(prefix_len);
         format!(
             "{}{}",
@@ -60,7 +62,7 @@ impl<T: PrimInt> Diamond<T> {
     }
 
     fn index_coordinates(&self) -> Vec<Coordinates> {
-        let max = self.identities.len() - 1;
+        let max = self.limits.len() - 1;
         let mut coordinate_rows = vec![];
         for i in (0..=max).rev() {
             let row: Coordinates = (i..=max).enumerate().collect();
